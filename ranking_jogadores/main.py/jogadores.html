@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sistema de Ranking de Jogadores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:nth-child(1) td {
+            background-color: gold;
+            font-weight: bold;
+        }
+        tr:nth-child(2) td {
+            background-color: silver;
+            font-weight: bold;
+        }
+        tr:nth-child(3) td {
+            background-color: #cd7f32; /* bronze */
+            font-weight: bold;
+        }
+        .highlight {
+            font-size: 1.2em;
+        }
+        select, button {
+            margin-top: 20px;
+            padding: 8px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Sistema de Ranking de Jogadores</h1>
+
+<label for="rankingSelect">Escolha a lista de ranking:</label>
+<select id="rankingSelect">
+    <option value="2025-09-09 18:23:12">2025-09-09 18:23:12</option>
+    <option value="2025-08-30 14:00:00">2025-08-30 14:00:00</option>
+</select>
+
+<button onclick="showRanking()">Exibir Ranking</button>
+
+<table id="rankingTable" style="display:none;">
+    <thead>
+        <tr>
+            <th>Posição</th>
+            <th>Nome</th>
+            <th>Nível</th>
+            <th>Pontuação</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+const rankings = {
+    "2025-09-09 18:23:12": [
+        { nome: "Carlos", nivel: 15, pontuacao: 3000.7 },
+        { nome: "Maria", nivel: 11, pontuacao: 2950.3 },
+        { nome: "João", nivel: 12, pontuacao: 2800.4 },
+        { nome: "Ana", nivel: 10, pontuacao: 1500.5 },
+        { nome: "Pedro", nivel: 8, pontuacao: 1200.2 }
+    ],
+    "2025-08-30 14:00:00": [
+        { nome: "Lucas", nivel: 9, pontuacao: 1800.1 },
+        { nome: "Mariana", nivel: 14, pontuacao: 2700.0 },
+        { nome: "Felipe", nivel: 13, pontuacao: 2500.5 },
+        { nome: "Julia", nivel: 10, pontuacao: 2100.3 }
+    ]
+};
+
+function showRanking() {
+    const select = document.getElementById("rankingSelect");
+    const data = select.value;
+    const ranking = rankings[data];
+
+    if (!ranking) {
+        alert("Ranking não encontrado.");
+        return;
+    }
+
+    const tbody = document.querySelector("#rankingTable tbody");
+    tbody.innerHTML = ""; // Limpa a tabela
+
+    ranking.forEach((player, index) => {
+        const tr = document.createElement("tr");
+        
+        // Posição com destaque para 3 primeiros
+        const posTd = document.createElement("td");
+        posTd.textContent = index + 1;
+        if (index === 0) posTd.innerHTML += " 🥇";
+        else if (index === 1) posTd.innerHTML += " 🥈";
+        else if (index === 2) posTd.innerHTML += " 🥉";
+        tr.appendChild(posTd);
+
+        const nomeTd = document.createElement("td");
+        nomeTd.textContent = player.nome;
+        tr.appendChild(nomeTd);
+
+        const nivelTd = document.createElement("td");
+        nivelTd.textContent = player.nivel;
+        tr.appendChild(nivelTd);
+
+        const pontuacaoTd = document.createElement("td");
+        pontuacaoTd.textContent = player.pontuacao.toFixed(1);
+        tr.appendChild(pontuacaoTd);
+
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("rankingTable").style.display = "table";
+}
+</script>
+
+</body>
+</html>
