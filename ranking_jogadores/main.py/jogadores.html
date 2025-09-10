@@ -39,13 +39,10 @@
             font-weight: bold;
         }
         tr:nth-child(3) td {
-            background-color: #cd7f32; /* bronze */
+            background-color: #cd7f32;
             font-weight: bold;
         }
-        .highlight {
-            font-size: 1.2em;
-        }
-        select, button {
+        select, button, input[type="file"] {
             margin-top: 20px;
             padding: 8px;
             font-size: 1em;
@@ -60,9 +57,16 @@
 <select id="rankingSelect">
     <option value="2025-09-09 18:23:12">2025-09-09 18:23:12</option>
     <option value="2025-08-30 14:00:00">2025-08-30 14:00:00</option>
+    <option value="2025-09-09 20:00:00">2025-09-09 20:00:00</option>
 </select>
 
 <button onclick="showRanking()">Exibir Ranking</button>
+
+<hr>
+
+<label for="importFile">Importar arquivo CSV de jogadores:</label><br>
+<input type="file" id="importFile" accept=".csv">
+<button onclick="importarLista()">Importar Lista</button>
 
 <table id="rankingTable" style="display:none;">
     <thead>
@@ -73,8 +77,7 @@
             <th>Pontuação</th>
         </tr>
     </thead>
-    <tbody>
-    </tbody>
+    <tbody></tbody>
 </table>
 
 <script>
@@ -91,6 +94,28 @@ const rankings = {
         { nome: "Mariana", nivel: 14, pontuacao: 2700.0 },
         { nome: "Felipe", nivel: 13, pontuacao: 2500.5 },
         { nome: "Julia", nivel: 10, pontuacao: 2100.3 }
+    ],
+    "2025-09-09 20:00:00": [
+        { nome: "Eduardo", nivel: 6, pontuacao: 200.0 },
+        { nome: "Mariana", nivel: 6, pontuacao: 210.0 },
+        { nome: "Quintino", nivel: 5, pontuacao: 165.0 },
+        { nome: "Helena", nivel: 5, pontuacao: 160.0 },
+        { nome: "Leonardo", nivel: 5, pontuacao: 155.0 },
+        { nome: "Alice", nivel: 5, pontuacao: 150.0 },
+        { nome: "Tatiane", nivel: 4, pontuacao: 140.0 },
+        { nome: "Karina", nivel: 4, pontuacao: 130.0 },
+        { nome: "Paulo", nivel: 4, pontuacao: 125.0 },
+        { nome: "Carla", nivel: 4, pontuacao: 120.0 },
+        { nome: "Gabriel", nivel: 4, pontuacao: 110.0 },
+        { nome: "Olivia", nivel: 3, pontuacao: 95.0 },
+        { nome: "Fernanda", nivel: 3, pontuacao: 90.0 },
+        { nome: "Juliana", nivel: 3, pontuacao: 85.0 },
+        { nome: "Bruno", nivel: 3, pontuacao: 80.5 },
+        { nome: "Rafaela", nivel: 3, pontuacao: 70.0 },
+        { nome: "Nicolas", nivel: 2, pontuacao: 60.0 },
+        { nome: "Samuel", nivel: 2, pontuacao: 55.0 },
+        { nome: "Daniel", nivel: 2, pontuacao: 50.0 },
+        { nome: "Igor", nivel: 2, pontuacao: 45.0 }
     ]
 };
 
@@ -105,12 +130,13 @@ function showRanking() {
     }
 
     const tbody = document.querySelector("#rankingTable tbody");
-    tbody.innerHTML = ""; // Limpa a tabela
+    tbody.innerHTML = "";
 
-    ranking.forEach((player, index) => {
+    const sortedRanking = [...ranking].sort((a, b) => b.pontuacao - a.pontuacao);
+
+    sortedRanking.forEach((player, index) => {
         const tr = document.createElement("tr");
-        
-        // Posição com destaque para 3 primeiros
+
         const posTd = document.createElement("td");
         posTd.textContent = index + 1;
         if (index === 0) posTd.innerHTML += " 🥇";
@@ -134,6 +160,65 @@ function showRanking() {
     });
 
     document.getElementById("rankingTable").style.display = "table";
+}
+
+function importarLista() {
+    const input = document.getElementById("importFile");
+    const file = input.files[0];
+
+    if (!file) {
+        alert("Selecione um arquivo CSV.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const text = event.target.result;
+        const linhas = text.trim().split("\n");
+
+        const novaLista = [];
+
+        for (let linha of linhas) {
+            linha = linha.trim();
+            if (!linha || linha.toLowerCase().startsWith("nome")) continue;
+
+            const [nome, nivelStr, pontuacaoStr] = linha.split(",");
+
+            const nomeLimpo = nome.trim();
+            const nivel = parseInt(nivelStr.trim());
+            const pontuacao = parseFloat(pontuacaoStr.trim());
+
+            if (nomeLimpo && !isNaN(nivel) && !isNaN(pontuacao)) {
+                novaLista.push({
+                    nome: nomeLimpo,
+                    nivel: nivel,
+                    pontuacao: pontuacao
+                });
+            }
+        }
+
+        if (novaLista.length === 0) {
+            alert("Nenhum jogador válido encontrado.");
+            return;
+        }
+
+        const agora = new Date();
+        const dataFormatada = agora.toISOString().replace("T", " ").substring(0, 19);
+
+        rankings[dataFormatada] = novaLista;
+
+        const select = document.getElementById("rankingSelect");
+        const option = document.createElement("option");
+        option.value = dataFormatada;
+        option.textContent = dataFormatada;
+        select.appendChild(option);
+        select.value = dataFormatada;
+
+        showRanking();
+        alert("Lista importada com sucesso!");
+    };
+
+    reader.readAsText(file);
 }
 </script>
 
